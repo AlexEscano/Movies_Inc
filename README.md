@@ -1,50 +1,104 @@
-# Welcome to your Expo app 👋
+# Movies Inc
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicacion movil multiplataforma (Expo + React Native) que consume la API publica de **[The Movie Database (TMDb)](https://developers.themoviedb.org/3)** para mostrar peliculas populares, mejor valoradas, proximos estrenos y su detalle completo. El proyecto esta construido sobre **TypeScript** y sigue una **Clean Architecture** con separacion estricta de capas.
 
-## Get started
+> Estilo visual inspirado en Netflix: fondo oscuro `#0D0D0D`, acento `#E50914` y tipografia Poppins.
 
-1. Install dependencies
+---
+
+## Stack principal
+
+- [Expo](https://expo.dev) (React Native 0.81)
+- TypeScript + ESLint strict
+- React Navigation (`@react-navigation/native` + `@react-navigation/native-stack`)
+- Axios para consumo de la API TMDb
+- Gestion de entorno con `react-native-dotenv`
+- Carga de fuentes con `@expo-google-fonts/poppins`
+
+---
+
+## Arquitectura Clean
+
+```
+src/
++-- app.tsx                # Punto de entrada (UI + providers)
++-- core/                  # Infraestructura transversal (env, axios, DI, errores)
++-- data/                  # Implementaciones concretas (datasource remoto, repositorios)
++-- domain/                # Entidades y casos de uso
++-- presentation/          # UI (navegacion, screens, componentes, hooks)
++-- types/                 # Tipos globales (env)
+```
+
+- **core/**: Configuracion de entorno, cliente Axios, mapeo de errores y registro de dependencias.
+- **data/**: `MovieApiDataSource` toca la API y `MovieRepositoryImpl` traduce respuestas a entidades de dominio.
+- **domain/**: Interfaces puras (`Movie`, `MovieDetail`, `MovieRepository`) y casos de uso orquestando logica (`GetPopularMovies`, etc.).
+- **presentation/**: Pantallas (`HomeScreen`, `DetailScreen`), navegacion (`AppNavigator`), componentes visuales y hooks (view models) que consumen los casos de uso.
+
+---
+
+## Estructura relevante
+
+- `src/core/config/env.ts`: Valida variables `.env` y las expone tipadas.
+- `src/core/network/apiClient.ts`: Instancia Axios con API Key y lenguaje por defecto.
+- `src/data/datasources/MovieApiDataSource.ts`: Mapea respuestas de TMDb a entidades del dominio.
+- `src/data/repositories/MovieRepositoryImpl.ts`: Manejo de errores y adaptacion a la interfaz del dominio.
+- `src/domain/entities/*.ts`: Tipado fuerte de peliculas y detalle.
+- `src/domain/usecases/*.ts`: Casos de uso por endpoint.
+- `src/presentation/navigation/AppNavigator.tsx`: Stack con Home + Detail.
+- `src/presentation/screens/HomeScreen.tsx`: Carruseles horizontales para populares, mejor valoradas y proximos estrenos.
+- `src/presentation/screens/DetailScreen.tsx`: Sinopsis, metadata y generos.
+
+---
+
+## Configuracion del entorno
+
+1. Crea un archivo `.env` (el repo ya incluye un ejemplo) con tu API key de TMDb:
+
+   ```bash
+   TMDB_API_KEY=tu_api_key
+   TMDB_BASE_URL=https://api.themoviedb.org/3
+   IMAGE_BASE_URL=https://image.tmdb.org/t/p/w500
+   ```
+
+2. Instala dependencias:
 
    ```bash
    npm install
    ```
 
-2. Start the app
+3. Inicia la app:
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+4. Escanea el QR con Expo Go, o presiona `a` / `i` para abrir en emulador Android / iOS respectivamente.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Pruebas
 
-## Get a fresh project
+Jest + React Native Testing Library se pueden anadir como mejora. El proyecto esta preparado para pruebas unitarias en los casos de uso (`src/domain/usecases`) y pruebas de integracion en componentes clave.
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
+## Posibles mejoras
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+1. **Busqueda**: Caso de uso `SearchMovies` consumiendo `/search/movie` con debounce en la UI.
+2. **Favoritos offline**: Persistencia con `AsyncStorage`, repositorio local conforme al dominio y secciones dedicadas.
+3. **Internacionalizacion**: Integrar `react-intl` o `i18next` para soportar multiples idiomas.
+4. **Skeletons y shimmer**: Mejor feedback visual durante el loading.
+5. **Testing**: Agregar suite Jest + RNTL con mocks de Axios y snapshots de pantallas.
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## Notas tecnicas
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- El tema oscuro esta centralizado en `src/presentation/theme`.
+- Fuentes Poppins se cargan en `src/app.tsx` antes de hidratar la navegacion.
+- Los hooks `useHomeViewModel` y `useMovieDetailViewModel` encapsulan la logica de orquestacion respetando Clean Architecture.
+- Para cambiar la region/idioma de TMDb basta con editar el parametro `language` en `src/core/network/apiClient.ts`.
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Listo. La base del proyecto esta estructurada para iterar rapido agregando mas funcionalidades sin romper la separacion de capas.

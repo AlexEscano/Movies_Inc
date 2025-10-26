@@ -1,0 +1,131 @@
+Movies Inc - Guia de archivos
+============================
+
+/.env
+  - Variables TMDB_API_KEY, TMDB_BASE_URL e IMAGE_BASE_URL consumidas por src/core/config/env.ts para parametrizar la API.
+
+/.gitignore
+  - Lista archivos y carpetas que git debe ignorar (por ejemplo node_modules, builds temporales).
+
+/app.json
+  - Configuracion principal de Expo (nombre, iconos, plugins). Leido automaticamente por el CLI de Expo en cada build.
+
+/App.tsx
+  - Punto de entrada de Expo. Importa src/app.tsx y delega toda la configuracion de la app en la capa de presentacion.
+
+/babel.config.js
+  - Configura Babel con los plugins module:react-native-dotenv (expuesto como @env) y module-resolver (alias @ -> src). Afecta toda la compilacion Metro.
+
+/eslint.config.js
+  - Ajustes de linting basados en eslint-config-expo. Usado al correr npm run lint.
+
+/expo-env.d.ts
+  - Declaraciones de tipos generadas por Expo. No se edita y evita errores de TypeScript al importar tipos de Expo.
+
+/package.json
+  - Manifiesto del proyecto (scripts, dependencias). npm/yarn lo leen para instalar paquetes y ejecutar comandos.
+
+/package-lock.json
+  - Snapshot exacto de dependencias instalado por npm. Garantiza misma version de paquetes en otros entornos.
+
+/README.md
+  - Documentacion de alto nivel (arquitectura, pasos de instalacion, mejoras futuras).
+
+/tsconfig.json
+  - Configuracion de TypeScript. Extiende expo/tsconfig.base, aplica modo estricto y define alias @ hacia src/.
+
+/src/app.tsx
+  - Bootstrap de la capa de presentacion. Carga fuentes Poppins (hook useFonts), inicializa GestureHandlerRootView y SafeAreaProvider, y renderiza AppNavigator. Dependencias: @expo-google-fonts/poppins, react-native-gesture-handler, react-native-safe-area-context, presentacion/components/LoadingIndicator y presentacion/navigation/AppNavigator.
+
+/src/core/config/env.ts
+  - Lee TMDB_API_KEY, TMDB_BASE_URL e IMAGE_BASE_URL desde @env. Valida que existan y expone un objeto EnvConfig. Consumido por core/network/apiClient.ts y pantallas para formar URLs.
+
+/src/core/di/container.ts
+  - Registra singletons de MovieApiDataSource y MovieRepositoryImpl. Crea instancias de casos de uso (getPopularMovies, etc.) y las exporta en useCases. Los hooks de presentacion dependen de este contenedor.
+
+/src/core/errors/AppError.ts
+  - Clase AppError (extiende Error) y helper mapToAppError. Reutilizado por MovieRepositoryImpl para estandarizar mensajes hacia la capa de presentacion.
+
+/src/core/network/apiClient.ts
+  - Configura una instancia Axios con baseURL (env.tmdbBaseUrl), api_key y language. Incluye interceptor de respuestas para normalizar errores. Consumido por data/datasources/MovieApiDataSource.ts.
+
+/src/data/datasources/MovieApiDataSource.ts
+  - Capa de acceso remoto. Ejecuta llamados HTTP mediante apiClient a /movie/popular, /movie/top_rated, /movie/upcoming y /movie/{id}. Mapea el JSON crudo a entidades Movie y MovieDetail. Usado exclusivamente por MovieRepositoryImpl.
+
+/src/data/repositories/MovieRepositoryImpl.ts
+  - Implementacion concreta de MovieRepository. Orquesta MovieApiDataSource, captura errores y los transforma con mapToAppError. Consumido por core/di/container.ts al registrar los casos de uso.
+
+/src/domain/entities/Movie.ts
+  - Interfaz de dominio Movie (tipado para listas). Compartido entre data (mapper), use cases y presentacion.
+
+/src/domain/entities/MovieDetail.ts
+  - Interfaz MovieDetail que extiende Movie con informacion extra (runtime, genres, tagline). Usada por MovieApiDataSource, MovieRepositoryImpl, useCases y pantallas de detalle.
+
+/src/domain/entities/Actor.ts
+  - Entidad Actor (id, name, character, profilePath) utilizada para representar cada miembro del reparto. Consumida por la capa de datos, casos de uso y DetailScreen.
+
+/src/domain/repositories/MovieRepository.ts
+  - Contrato que define los metodos getPopular, getTopRated, getUpcoming, getMovieById y getCreditsByMovieId. Implementado por MovieRepositoryImpl y dependido por los casos de uso.
+
+/src/domain/usecases/getPopularMovies.ts
+  - Caso de uso que delega en MovieRepository.getPopular(). Consumido por useHomeViewModel via container.
+
+/src/domain/usecases/getTopRatedMovies.ts
+  - Caso de uso para MovieRepository.getTopRated(). Consumido por useHomeViewModel via container.
+
+/src/domain/usecases/getUpcomingMovies.ts
+  - Caso de uso para MovieRepository.getUpcoming(). Consumido por useHomeViewModel via container.
+
+/src/domain/usecases/getMovieDetail.ts
+  - Caso de uso para MovieRepository.getMovieById(id). Consumido por useMovieDetailViewModel via container.
+
+/src/domain/usecases/getMovieCredits.ts
+  - Caso de uso para MovieRepository.getCreditsByMovieId(id). Consumido por useMovieDetailViewModel via container.
+
+/src/domain/usecases/index.ts
+  - Barrel file que reexporta los casos de uso anteriores. Importado en core/di/container.ts.
+
+/src/presentation/components/ErrorState.tsx
+  - Componente visual para mostrar mensajes de error. Utiliza colores/typography del tema. Usado en HomeScreen y DetailScreen.
+
+/src/presentation/components/LoadingIndicator.tsx
+  - Wrapper reutilizable de ActivityIndicator con estilos centrados. Usado en HomeScreen, DetailScreen y como fallback mientras cargan fuentes en src/app.tsx.
+
+/src/presentation/components/MovieCard.tsx
+  - Tarjeta individual de pelicula (imagen, rating, titulo). Recibe Movie, imageBaseUrl y accion onPress. Reutilizada por MovieCarousel.
+
+/src/presentation/components/MovieCarousel.tsx
+  - Lista horizontal (FlatList) que renderiza MovieCard. Recibida en HomeScreen para populares, mejor valoradas y proximos estrenos.
+
+/src/presentation/hooks/useHomeViewModel.ts
+  - Hook que encapsula logica de HomeScreen. Llama en paralelo a los casos de uso getPopularMovies, getTopRatedMovies, getUpcomingMovies. Maneja estados loading/error. Provee datos a la UI.
+
+/src/presentation/hooks/useMovieDetailViewModel.ts
+  - Hook para DetailScreen. Ejecuta getMovieDetail y getMovieCredits en paralelo; expone data, credits, loading y error. Maneja cleanup cuando el componente se desmonta.
+
+/src/presentation/navigation/AppNavigator.tsx
+  - Configura NavigationContainer con tema oscuro y stack navigator (Home -> Detail). HomeScreen se carga sin header, DetailScreen con titulo. Renderizado desde src/app.tsx.
+
+/src/presentation/navigation/types.ts
+  - Tipado RootStackParamList para la navegacion. Usado por las pantallas y AppNavigator para tipos seguros.
+
+/src/presentation/screens/HomeScreen.tsx
+  - Pantalla principal. Consume useHomeViewModel, renderiza encabezado y los tres MovieCarousel. Navega a DetailScreen via navigation.navigate('Detail', { movieId }).
+
+/src/presentation/screens/DetailScreen.tsx
+  - Pantalla de detalle. Usa useMovieDetailViewModel para obtener MovieDetail y credits; muestra hero con backdrop, sinopsis, metadata, generos y reparto principal. Usa ErrorState y LoadingIndicator para feedback.
+
+/src/presentation/theme/colors.ts
+  - Paleta centralizada (background, accent, textos, surface). Importada por componentes y pantallas.
+
+/src/presentation/theme/spacing.ts
+  - Escala de espaciado (xs-xl). Consumida en estilos.
+
+/src/presentation/theme/typography.ts
+  - Identificadores de fuentes Poppins. Usados en estilos para mantener consistencia.
+
+/src/presentation/theme/index.ts
+  - Barrel file que reexporta colors, spacing y typography. Facilita importaciones simples (../theme).
+
+/src/types/env.d.ts
+  - Declaracion de modulo @env para TypeScript. Permite importar TMDB_API_KEY, etc., con tipado correcto en env.ts y demas archivos.
