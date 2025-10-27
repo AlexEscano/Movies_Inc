@@ -7,6 +7,7 @@ type HomeState = {
   popular: Movie[];
   topRated: Movie[];
   upcoming: Movie[];
+  nowPlaying: Movie[];
   loading: boolean;
   error: string | null;
 };
@@ -15,6 +16,7 @@ const initialState: HomeState = {
   popular: [],
   topRated: [],
   upcoming: [],
+  nowPlaying: [],
   loading: true,
   error: null,
 };
@@ -29,17 +31,29 @@ export const useHomeViewModel = () => {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
       try {
-        const [popular, topRated, upcoming] = await Promise.all([
+        const [popular, topRated, upcoming, nowPlaying] = await Promise.all([
           useCases.getPopularMovies.execute(),
           useCases.getTopRatedMovies.execute(),
           useCases.getUpcomingMovies.execute(),
+          useCases.getNowPlayingMovies.execute(),
         ]);
 
         if (!active) {
           return;
         }
 
-        setState({ popular, topRated, upcoming, loading: false, error: null });
+        const sortedNowPlaying = [...nowPlaying].sort((a, b) =>
+          a.title.localeCompare(b.title, 'es', { sensitivity: 'base' }),
+        );
+
+        setState({
+          popular,
+          topRated,
+          upcoming,
+          nowPlaying: sortedNowPlaying,
+          loading: false,
+          error: null,
+        });
       } catch (error) {
         if (!active) {
           return;

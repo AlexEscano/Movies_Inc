@@ -7,6 +7,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import env from "../../core/config/env";
@@ -15,12 +16,60 @@ import { LoadingIndicator } from "../components/LoadingIndicator";
 import { useMovieDetailViewModel } from "../hooks/useMovieDetailViewModel";
 import { RootStackParamList } from "../navigation/types";
 import { colors, spacing, typography } from "../theme";
+import { FavoriteButton } from "../components/FavoriteButton";
+import { useFavorites } from "../state/FavoritesContext";
+import { MovieCarousel } from "../components/MovieCarousel";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Detail">;
 
-export const DetailScreen: React.FC<Props> = ({ route }) => {
+export const DetailScreen: React.FC<Props> = ({ route, navigation }) => {
   const { movieId } = route.params;
-  const { data, credits, loading, error } = useMovieDetailViewModel(movieId);
+  const {
+    data,
+    credits,
+    recommendations,
+    loading,
+    error,
+    rateMovie,
+    ratingSubmitting,
+    ratingSuccess,
+    ratingError,
+    clearRatingFeedback,
+  } = useMovieDetailViewModel(movieId);
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const [selectedStars, setSelectedStars] = React.useState(0);
+
+  React.useEffect(() => {
+    if (data) {
+      setSelectedStars(Math.round(data.voteAverage / 2));
+    } else {
+      setSelectedStars(0);
+    }
+  }, [data]);
+
+  const handleToggleFavorite = React.useCallback(() => {
+    if (data) {
+      toggleFavorite(data);
+    }
+  }, [data, toggleFavorite]);
+
+  const handlePressMovie = React.useCallback(
+    (id: number) => {
+      navigation.push("Detail", { movieId: id });
+    },
+    [navigation]
+  );
+
+  const handleSelectStar = (value: number) => {
+    if (!data || ratingSubmitting) {
+      return;
+    }
+    setSelectedStars(value);
+    clearRatingFeedback();
+    rateMovie(value * 2);
+  };
+
+  const isCurrentFavorite = data ? isFavorite(data.id) : false;
 
   if (loading) {
     return (
@@ -77,6 +126,44 @@ export const DetailScreen: React.FC<Props> = ({ route }) => {
 
       {Header}
 
+      <View style={styles.actionsContainer}>
+        <View style={styles.favoriteAction}>
+          <FavoriteButton isFavorite={isCurrentFavorite} onPress={handleToggleFavorite} />
+        </View>
+        <View style={styles.ratingContainer}>
+          <Text style={styles.ratingLabel}>Califica esta pelicula</Text>
+          <View style={styles.starsRow}>
+            {[1, 2, 3, 4, 5].map(star => {
+              const filled = star <= selectedStars;
+              return (
+                <TouchableOpacity
+                  key={star}
+                  style={styles.starButton}
+                  onPress={() => handleSelectStar(star)}
+                  disabled={ratingSubmitting}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Calificar con ${star} ${star === 1 ? "estrella" : "estrellas"}`}
+                >
+                  <Text style={[styles.starText, filled ? styles.starFilled : styles.starEmpty]}>
+                    {filled ? "★" : "☆"}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          {ratingSubmitting ? (
+            <Text style={styles.ratingStatus}>Enviando calificacion...</Text>
+          ) : null}
+          {ratingSuccess ? (
+            <Text style={[styles.ratingStatus, styles.ratingSuccess]}>{ratingSuccess}</Text>
+          ) : null}
+          {ratingError ? (
+            <Text style={[styles.ratingStatus, styles.ratingError]}>{ratingError}</Text>
+          ) : null}
+        </View>
+      </View>
+
       <View style={styles.section}>
         <Text style={styles.sectionHeading}>Sinopsis</Text>
         <Text style={styles.body}>{data.overview}</Text>
@@ -112,6 +199,17 @@ export const DetailScreen: React.FC<Props> = ({ route }) => {
           ))}
         </View>
       </View>
+
+      {recommendations.length > 0 ? (
+        <MovieCarousel
+          title="Recomendaciones"
+          data={recommendations}
+          imageBaseUrl={env.imageBaseUrl}
+          onPressItem={(movie) => handlePressMovie(movie.id)}
+          onToggleFavorite={toggleFavorite}
+          isFavorite={isFavorite}
+        />
+      ) : null}
 
       <View style={styles.section}>
         <Text style={styles.sectionHeading}>Reparto principal</Text>
@@ -162,6 +260,50 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingBottom: spacing.xl,
+  },
+  actionsContainer: {
+    paddingHorizontal: spacing.lg,
+    marginTop: spacing.xl,
+  },
+  favoriteAction: {
+    marginBottom: spacing.lg,
+  },
+  ratingContainer: {
+    marginTop: spacing.lg,
+  },
+  ratingLabel: {
+    color: colors.textPrimary,
+    fontFamily: typography.fontSemiBold,
+    fontSize: 16,
+  },
+  starsRow: {
+    flexDirection: "row",
+    marginTop: spacing.sm,
+  },
+  starButton: {
+    marginRight: spacing.sm,
+  },
+  starText: {
+    fontSize: 28,
+    fontFamily: typography.fontSemiBold,
+  },
+  starFilled: {
+    color: colors.accent,
+  },
+  starEmpty: {
+    color: colors.textSecondary,
+  },
+  ratingStatus: {
+    marginTop: spacing.xs,
+    color: colors.textSecondary,
+    fontFamily: typography.fontRegular,
+    fontSize: 13,
+  },
+  ratingSuccess: {
+    color: colors.textPrimary,
+  },
+  ratingError: {
+    color: colors.accent,
   },
   backdrop: {
     height: 320,

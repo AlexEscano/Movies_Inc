@@ -6,6 +6,7 @@ import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, P
 import { AppNavigator } from './presentation/navigation/AppNavigator';
 import { LoadingIndicator } from './presentation/components/LoadingIndicator';
 import { colors } from './presentation/theme';
+import { FavoritesProvider } from './presentation/state/FavoritesContext';
 
 const App: React.FC = () => {
   const [fontsLoaded] = useFonts({
@@ -26,7 +27,9 @@ const App: React.FC = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <AppNavigator />
+        <FavoritesProvider>
+          <AppNavigator />
+        </FavoritesProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

@@ -9,9 +9,18 @@ type Props = {
   data: Movie[];
   imageBaseUrl: string;
   onPressItem: (movie: Movie) => void;
+  onToggleFavorite?: (movie: Movie) => void;
+  isFavorite?: (id: number) => boolean;
 };
 
-export const MovieCarousel: React.FC<Props> = ({ title, data, imageBaseUrl, onPressItem }) => {
+export const MovieCarousel: React.FC<Props> = ({
+  title,
+  data,
+  imageBaseUrl,
+  onPressItem,
+  onToggleFavorite,
+  isFavorite,
+}) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
@@ -21,7 +30,13 @@ export const MovieCarousel: React.FC<Props> = ({ title, data, imageBaseUrl, onPr
         showsHorizontalScrollIndicator={false}
         data={data}
         renderItem={({ item }) => (
-          <MovieCard movie={item} imageBaseUrl={imageBaseUrl} onPress={onPressItem} />
+          <MovieCard
+            movie={item}
+            imageBaseUrl={imageBaseUrl}
+            onPress={onPressItem}
+            onToggleFavorite={onToggleFavorite}
+            isFavorite={isFavorite ? isFavorite(item.id) : false}
+          />
         )}
         keyExtractor={item => item.id.toString()}
       />

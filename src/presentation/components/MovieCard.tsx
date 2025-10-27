@@ -2,14 +2,17 @@ import React from 'react';
 import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Movie } from '../../domain/entities/Movie';
 import { colors, spacing, typography } from '../theme';
+import { FavoriteButton } from './FavoriteButton';
 
 type Props = {
   movie: Movie;
   imageBaseUrl: string;
   onPress: (movie: Movie) => void;
+  onToggleFavorite?: (movie: Movie) => void;
+  isFavorite?: boolean;
 };
 
-export const MovieCard: React.FC<Props> = ({ movie, imageBaseUrl, onPress }) => {
+export const MovieCard: React.FC<Props> = ({ movie, imageBaseUrl, onPress, onToggleFavorite, isFavorite = false }) => {
   const posterUri = movie.posterPath ? { uri: `${imageBaseUrl}${movie.posterPath}` } : undefined;
 
   return (
@@ -26,6 +29,11 @@ export const MovieCard: React.FC<Props> = ({ movie, imageBaseUrl, onPress }) => 
             <Text style={styles.placeholderText}>Sin imagen</Text>
           </View>
         )}
+        {onToggleFavorite ? (
+          <View style={styles.favoriteWrapper}>
+            <FavoriteButton compact isFavorite={isFavorite} onPress={() => onToggleFavorite(movie)} />
+          </View>
+        ) : null}
       </View>
       <Text style={styles.title} numberOfLines={2}>
         {movie.title}
@@ -45,6 +53,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: colors.surface,
+    position: 'relative',
   },
   posterBackground: {
     width: '100%',
@@ -75,6 +84,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderBottomLeftRadius: 12,
+  },
+  favoriteWrapper: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.sm,
   },
   voteText: {
     color: colors.textPrimary,

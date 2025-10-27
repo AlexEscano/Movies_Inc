@@ -42,6 +42,12 @@ type MovieCreditsResponse = {
   }>;
 };
 
+type GuestSessionResponse = {
+  success: boolean;
+  guest_session_id: string;
+  expires_at: string;
+};
+
 // Shapes raw TMDb responses into domain entities.
 const mapToMovie = (raw: MovieListResponse['results'][0]): Movie => ({
   id: raw.id,
@@ -86,6 +92,11 @@ export class MovieApiDataSource {
     return data.results.map(mapToMovie);
   }
 
+  async getNowPlaying(): Promise<Movie[]> {
+    const { data } = await apiClient.get<MovieListResponse>('/movie/now_playing');
+    return data.results.map(mapToMovie);
+  }
+
   async getMovieById(id: number): Promise<MovieDetail> {
     const { data } = await apiClient.get<MovieDetailResponse>(`/movie/${id}`);
     return mapToMovieDetail(data);
@@ -99,5 +110,27 @@ export class MovieApiDataSource {
       character: cast.character,
       profilePath: cast.profile_path,
     }));
+  }
+
+  async getRecommendationsByMovieId(id: number): Promise<Movie[]> {
+    const { data } = await apiClient.get<MovieListResponse>(`/movie/${id}/recommendations`);
+    return data.results.map(mapToMovie);
+  }
+
+  async rateMovie(id: number, rating: number, guestSessionId: string): Promise<void> {
+    await apiClient.post(
+      `/movie/${id}/rating`,
+      { value: rating },
+      {
+        params: {
+          guest_session_id: guestSessionId,
+        },
+      },
+    );
+  }
+
+  async createGuestSession(): Promise<string> {
+    const { data } = await apiClient.get<GuestSessionResponse>('/authentication/guest_session/new');
+    return data.guest_session_id;
   }
 }

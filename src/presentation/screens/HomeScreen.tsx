@@ -8,15 +8,31 @@ import { ErrorState } from '../components/ErrorState';
 import { MovieCarousel } from '../components/MovieCarousel';
 import env from '../../core/config/env';
 import { RootStackParamList } from '../navigation/types';
+import { NowPlayingList } from '../components/NowPlayingList';
+import { useFavorites } from '../state/FavoritesContext';
+import { Movie } from '../../domain/entities/Movie';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export const HomeScreen: React.FC<Props> = ({ navigation }) => {
-  const { popular, topRated, upcoming, loading, error } = useHomeViewModel();
+  const { popular, topRated, upcoming, nowPlaying, loading, error } = useHomeViewModel();
+  const { favorites, toggleFavorite, isFavorite } = useFavorites();
 
   const handlePressMovie = (id: number) => {
     navigation.navigate('Detail', { movieId: id });
   };
+
+  const handleToggleFavorite = React.useCallback(
+    (movie: Movie) => {
+      toggleFavorite(movie);
+    },
+    [toggleFavorite],
+  );
+
+  const favoriteMovies = React.useMemo(
+    () => [...favorites].sort((a, b) => a.title.localeCompare(b.title, 'es', { sensitivity: 'base' })),
+    [favorites],
+  );
 
   return (
     <View style={styles.container}>
@@ -33,23 +49,46 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
         {!loading && !error && (
           <>
+            {favoriteMovies.length > 0 && (
+              <MovieCarousel
+                title="Mis favoritos"
+                data={favoriteMovies}
+                imageBaseUrl={env.imageBaseUrl}
+                onPressItem={movie => handlePressMovie(movie.id)}
+                onToggleFavorite={handleToggleFavorite}
+                isFavorite={isFavorite}
+              />
+            )}
             <MovieCarousel
               title="Populares"
               data={popular}
               imageBaseUrl={env.imageBaseUrl}
               onPressItem={movie => handlePressMovie(movie.id)}
+              onToggleFavorite={handleToggleFavorite}
+              isFavorite={isFavorite}
             />
             <MovieCarousel
               title="Mejor valoradas"
               data={topRated}
               imageBaseUrl={env.imageBaseUrl}
               onPressItem={movie => handlePressMovie(movie.id)}
+              onToggleFavorite={handleToggleFavorite}
+              isFavorite={isFavorite}
             />
             <MovieCarousel
               title="Proximos estrenos"
               data={upcoming}
               imageBaseUrl={env.imageBaseUrl}
               onPressItem={movie => handlePressMovie(movie.id)}
+              onToggleFavorite={handleToggleFavorite}
+              isFavorite={isFavorite}
+            />
+            <NowPlayingList
+              movies={nowPlaying}
+              imageBaseUrl={env.imageBaseUrl}
+              onPressItem={movie => handlePressMovie(movie.id)}
+              onToggleFavorite={handleToggleFavorite}
+              isFavorite={isFavorite}
             />
           </>
         )}
