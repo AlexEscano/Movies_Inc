@@ -55,7 +55,7 @@ src/
 1. Crea un archivo `.env` (el repo ya incluye un ejemplo) con tu API key de TMDb:
 
    ```bash
-   TMDB_API_KEY=tu_api_key
+   TMDB_API_KEY=Aqui va la api
    TMDB_BASE_URL=https://api.themoviedb.org/3
    IMAGE_BASE_URL=https://image.tmdb.org/t/p/w500
    ```
@@ -98,7 +98,3 @@ Jest + React Native Testing Library se pueden anadir como mejora. El proyecto es
 - Fuentes Poppins se cargan en `src/app.tsx` antes de hidratar la navegacion.
 - Los hooks `useHomeViewModel` y `useMovieDetailViewModel` encapsulan la logica de orquestacion respetando Clean Architecture.
 - Para cambiar la region/idioma de TMDb basta con editar el parametro `language` en `src/core/network/apiClient.ts`.
-
----
-
-Listo. La base del proyecto esta estructurada para iterar rapido agregando mas funcionalidades sin romper la separacion de capas.
