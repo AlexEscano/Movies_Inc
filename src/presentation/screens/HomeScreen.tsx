@@ -11,6 +11,7 @@ import { RootStackParamList } from '../navigation/types';
 import { NowPlayingList } from '../components/NowPlayingList';
 import { useFavorites } from '../state/FavoritesContext';
 import { Movie } from '../../domain/entities/Movie';
+import { HeroCarousel } from '../components/HeroCarousel';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -34,6 +35,11 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
     [favorites],
   );
 
+  const heroMovies = React.useMemo(
+    () => popular.slice(0, Math.min(popular.length, 5)),
+    [popular],
+  );
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -49,6 +55,13 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
         {!loading && !error && (
           <>
+            <View style={styles.heroWrapper}>
+              <HeroCarousel
+                movies={heroMovies}
+                imageBaseUrl={env.imageBaseUrl}
+                onPressDetails={movie => handlePressMovie(movie.id)}
+              />
+            </View>
             {favoriteMovies.length > 0 && (
               <MovieCarousel
                 title="Mis favoritos"
@@ -110,6 +123,9 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: colors.textPrimary,
     paddingHorizontal: spacing.lg,
+    marginBottom: spacing.xl,
+  },
+  heroWrapper: {
     marginBottom: spacing.xl,
   },
   loadingWrapper: {
