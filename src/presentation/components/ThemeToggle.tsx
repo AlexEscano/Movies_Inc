@@ -17,6 +17,7 @@ export const ThemeToggle: React.FC = () => {
         thumbColor={isDark ? colors.accent : '#FFFFFF'}
         trackColor={{ false: colors.border, true: colors.accent }}
         ios_backgroundColor={colors.border}
+        testID="theme-toggle-switch"
       />
     </View>
   );
