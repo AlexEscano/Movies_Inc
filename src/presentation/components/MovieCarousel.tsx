@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Movie } from '../../domain/entities/Movie';
-import { colors, spacing, typography } from '../theme';
+import { ColorTheme, spacing, typography, useThemedStyles } from '../theme';
 import { MovieCard } from './MovieCard';
 
 type Props = {
@@ -13,6 +13,23 @@ type Props = {
   isFavorite?: (id: number) => boolean;
 };
 
+const createStyles = (colors: ColorTheme) =>
+  StyleSheet.create({
+    container: {
+      marginBottom: spacing.xl,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontSemiBold,
+      fontSize: 20,
+      marginBottom: spacing.md,
+      paddingHorizontal: spacing.lg,
+    },
+    listContent: {
+      paddingHorizontal: spacing.lg,
+    },
+  });
+
 export const MovieCarousel: React.FC<Props> = ({
   title,
   data,
@@ -21,6 +38,8 @@ export const MovieCarousel: React.FC<Props> = ({
   onToggleFavorite,
   isFavorite,
 }) => {
+  const styles = useThemedStyles(createStyles);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
@@ -43,19 +62,3 @@ export const MovieCarousel: React.FC<Props> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.xl,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontSemiBold,
-    fontSize: 20,
-    marginBottom: spacing.md,
-    paddingHorizontal: spacing.lg,
-  },
-  listContent: {
-    paddingHorizontal: spacing.lg,
-  },
-});

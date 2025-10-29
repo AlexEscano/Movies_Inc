@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import { Movie } from '../../domain/entities/Movie';
-import { colors, spacing, typography } from '../theme';
+import { ColorTheme, ThemeMode, spacing, typography, useTheme } from '../theme';
 
 type Props = {
   movies: Movie[];
@@ -24,12 +24,85 @@ const HERO_WIDTH = Dimensions.get('window').width;
 const HERO_HEIGHT = HERO_WIDTH * 0.56;
 const DEFAULT_INTERVAL = 5000;
 
+const createStyles = (colors: ColorTheme, mode: ThemeMode) =>
+  StyleSheet.create({
+    slide: {
+      width: HERO_WIDTH,
+      height: HERO_HEIGHT,
+      backgroundColor: colors.surface,
+    },
+    background: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    backgroundImage: {
+      opacity: 0.75,
+    },
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: mode === 'dark' ? 'rgba(13, 13, 13, 0.45)' : 'rgba(0, 0, 0, 0.25)',
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.xl,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontBold,
+      fontSize: 28,
+      marginBottom: spacing.md,
+    },
+    button: {
+      backgroundColor: colors.accent,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderRadius: 999,
+      alignSelf: 'flex-start',
+    },
+    buttonOutline: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.accent,
+    },
+    buttonText: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontSemiBold,
+      fontSize: 14,
+    },
+    fallback: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+      paddingHorizontal: spacing.lg,
+      backgroundColor: colors.surface,
+    },
+    dotsContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: spacing.sm,
+    },
+    dot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: mode === 'dark' ? colors.surface : colors.border,
+      marginHorizontal: spacing.xs,
+    },
+    dotActive: {
+      backgroundColor: colors.accent,
+      width: 16,
+    },
+  });
+
 export const HeroCarousel: React.FC<Props> = ({
   movies,
   imageBaseUrl,
   onPressDetails,
   intervalMs = DEFAULT_INTERVAL,
 }) => {
+  const { colors, mode } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors, mode), [colors, mode]);
   const listRef = React.useRef<FlatList<Movie>>(null);
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
@@ -177,73 +250,3 @@ export const HeroCarousel: React.FC<Props> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  slide: {
-    width: HERO_WIDTH,
-    height: HERO_HEIGHT,
-    backgroundColor: colors.surface,
-  },
-  background: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backgroundImage: {
-    opacity: 0.75,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(13, 13, 13, 0.45)',
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontBold,
-    fontSize: 28,
-    marginBottom: spacing.md,
-  },
-  button: {
-    backgroundColor: colors.accent,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: 999,
-    alignSelf: 'flex-start',
-  },
-  buttonOutline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.accent,
-  },
-  buttonText: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontSemiBold,
-    fontSize: 14,
-  },
-  fallback: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingHorizontal: spacing.lg,
-    backgroundColor: colors.surface,
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: spacing.sm,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.surface,
-    marginHorizontal: spacing.xs,
-  },
-  dotActive: {
-    backgroundColor: colors.accent,
-    width: 16,
-  },
-});

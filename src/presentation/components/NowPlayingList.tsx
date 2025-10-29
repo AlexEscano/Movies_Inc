@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Movie } from '../../domain/entities/Movie';
-import { colors, spacing, typography } from '../theme';
+import { ColorTheme, spacing, typography, useThemedStyles } from '../theme';
 import { FavoriteButton } from './FavoriteButton';
 
 type Props = {
@@ -26,6 +26,62 @@ const formatDate = (value: string) => {
   return parsed.toLocaleDateString('es-ES');
 };
 
+const createStyles = (colors: ColorTheme) =>
+  StyleSheet.create({
+    container: {
+      marginBottom: spacing.xl,
+      paddingHorizontal: spacing.lg,
+    },
+    heading: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontSemiBold,
+      fontSize: 20,
+      marginBottom: spacing.md,
+    },
+    item: {
+      flexDirection: 'row',
+      marginBottom: spacing.lg,
+    },
+    posterWrapper: {
+      width: 100,
+      height: 150,
+      borderRadius: 16,
+      overflow: 'hidden',
+      marginRight: spacing.md,
+      backgroundColor: colors.surface,
+    },
+    poster: {
+      width: '100%',
+      height: '100%',
+    },
+    posterFallback: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderColor: colors.border,
+      borderWidth: 1,
+    },
+    posterFallbackText: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontRegular,
+      fontSize: 12,
+    },
+    details: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    title: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontSemiBold,
+      fontSize: 16,
+    },
+    meta: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontRegular,
+      fontSize: 13,
+      marginTop: spacing.xs,
+    },
+  });
+
 export const NowPlayingList: React.FC<Props> = ({
   movies,
   imageBaseUrl,
@@ -34,6 +90,8 @@ export const NowPlayingList: React.FC<Props> = ({
   isFavorite,
   title = 'En cartelera',
 }) => {
+  const styles = useThemedStyles(createStyles);
+
   if (movies.length === 0) {
     return null;
   }
@@ -79,58 +137,3 @@ export const NowPlayingList: React.FC<Props> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.xl,
-    paddingHorizontal: spacing.lg,
-  },
-  heading: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontSemiBold,
-    fontSize: 20,
-    marginBottom: spacing.md,
-  },
-  item: {
-    flexDirection: 'row',
-    marginBottom: spacing.lg,
-  },
-  posterWrapper: {
-    width: 100,
-    height: 150,
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginRight: spacing.md,
-    backgroundColor: colors.surface,
-  },
-  poster: {
-    width: '100%',
-    height: '100%',
-  },
-  posterFallback: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderColor: colors.border,
-    borderWidth: 1,
-  },
-  posterFallbackText: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontRegular,
-    fontSize: 12,
-  },
-  details: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  title: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontSemiBold,
-    fontSize: 16,
-  },
-  meta: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontRegular,
-    fontSize: 13,
-    marginTop: spacing.xs,
-  },
-});

@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { colors, spacing, typography } from '../theme';
+import { ColorTheme, spacing, typography, useThemedStyles } from '../theme';
 
 type Props = {
   isFavorite: boolean;
@@ -8,8 +8,45 @@ type Props = {
   compact?: boolean;
 };
 
+const createStyles = (colors: ColorTheme) =>
+  StyleSheet.create({
+    base: {
+      borderRadius: 999,
+      borderWidth: 1,
+      borderColor: colors.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    regular: {
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+    },
+    compact: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+    },
+    inactive: {
+      backgroundColor: 'transparent',
+    },
+    active: {
+      backgroundColor: colors.accent,
+    },
+    text: {
+      color: colors.accent,
+      fontFamily: typography.fontSemiBold,
+      fontSize: 14,
+    },
+    textCompact: {
+      fontSize: 12,
+    },
+    textActive: {
+      color: colors.textPrimary,
+    },
+  });
+
 export const FavoriteButton: React.FC<Props> = ({ isFavorite, onPress, compact = false }) => {
-  const label = compact ? 'Fav' : isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos';
+  const styles = useThemedStyles(createStyles);
+  const label = compact ? 'Fav' : isFavorite ? 'Quitar de favoritos' : 'Anadir a favoritos';
 
   return (
     <TouchableOpacity
@@ -28,38 +65,3 @@ export const FavoriteButton: React.FC<Props> = ({ isFavorite, onPress, compact =
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  regular: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  compact: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  inactive: {
-    backgroundColor: 'transparent',
-  },
-  active: {
-    backgroundColor: colors.accent,
-  },
-  text: {
-    color: colors.accent,
-    fontFamily: typography.fontSemiBold,
-    fontSize: 14,
-  },
-  textCompact: {
-    fontSize: 12,
-  },
-  textActive: {
-    color: colors.textPrimary,
-  },
-});

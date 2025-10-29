@@ -15,7 +15,7 @@ import { ErrorState } from "../components/ErrorState";
 import { LoadingIndicator } from "../components/LoadingIndicator";
 import { useMovieDetailViewModel } from "../hooks/useMovieDetailViewModel";
 import { RootStackParamList } from "../navigation/types";
-import { colors, spacing, typography } from "../theme";
+import { ColorTheme, ThemeMode, spacing, typography, useTheme } from "../theme";
 import { FavoriteButton } from "../components/FavoriteButton";
 import { useFavorites } from "../state/FavoritesContext";
 import { MovieCarousel } from "../components/MovieCarousel";
@@ -38,6 +38,8 @@ export const DetailScreen: React.FC<Props> = ({ route, navigation }) => {
   } = useMovieDetailViewModel(movieId);
   const { toggleFavorite, isFavorite } = useFavorites();
   const [selectedStars, setSelectedStars] = React.useState(0);
+  const { colors, mode } = useTheme();
+  const styles = React.useMemo(() => createStyles(colors, mode), [colors, mode]);
 
   React.useEffect(() => {
     if (data) {
@@ -74,7 +76,7 @@ export const DetailScreen: React.FC<Props> = ({ route, navigation }) => {
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle={mode === "dark" ? "light-content" : "dark-content"} />
         <LoadingIndicator />
       </View>
     );
@@ -83,7 +85,7 @@ export const DetailScreen: React.FC<Props> = ({ route, navigation }) => {
   if (error || !data) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <StatusBar barStyle="light-content" />
+        <StatusBar barStyle={mode === "dark" ? "light-content" : "dark-content"} />
         <ErrorState
           message={error ?? "No se encontro la informacion de la pelicula."}
         />
@@ -122,7 +124,7 @@ export const DetailScreen: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={mode === "dark" ? "light-content" : "dark-content"} />
 
       {Header}
 
@@ -250,176 +252,177 @@ export const DetailScreen: React.FC<Props> = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    justifyContent: "center",
-  },
-  content: {
-    paddingBottom: spacing.xl,
-  },
-  actionsContainer: {
-    paddingHorizontal: spacing.lg,
-    marginTop: spacing.xl,
-  },
-  favoriteAction: {
-    marginBottom: spacing.lg,
-  },
-  ratingContainer: {
-    marginTop: spacing.lg,
-  },
-  ratingLabel: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontSemiBold,
-    fontSize: 16,
-  },
-  starsRow: {
-    flexDirection: "row",
-    marginTop: spacing.sm,
-  },
-  starButton: {
-    marginRight: spacing.sm,
-  },
-  starText: {
-    fontSize: 28,
-    fontFamily: typography.fontSemiBold,
-  },
-  starFilled: {
-    color: colors.accent,
-  },
-  starEmpty: {
-    color: colors.textSecondary,
-  },
-  ratingStatus: {
-    marginTop: spacing.xs,
-    color: colors.textSecondary,
-    fontFamily: typography.fontRegular,
-    fontSize: 13,
-  },
-  ratingSuccess: {
-    color: colors.textPrimary,
-  },
-  ratingError: {
-    color: colors.accent,
-  },
-  backdrop: {
-    height: 320,
-    justifyContent: "flex-end",
-  },
-  backdropImage: {
-    opacity: 0.7,
-  },
-  backdropOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(13, 13, 13, 0.6)",
-  },
-  backdropFallback: {
-    backgroundColor: colors.surface,
-  },
-  titleWrapper: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontBold,
-    fontSize: 28,
-  },
-  tagline: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontMedium,
-    fontSize: 16,
-    marginTop: spacing.sm,
-  },
-  section: {
-    paddingHorizontal: spacing.lg,
-    marginTop: spacing.xl,
-  },
-  sectionHeading: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontSemiBold,
-    fontSize: 20,
-    marginBottom: spacing.md,
-  },
-  body: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontRegular,
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: spacing.sm,
-  },
-  detailLabel: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontMedium,
-    fontSize: 14,
-  },
-  detailValue: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontSemiBold,
-    fontSize: 14,
-  },
-  rating: {
-    color: colors.accent,
-  },
-  genreContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  genreChip: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-    borderRadius: 999,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginRight: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  genreText: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontRegular,
-    fontSize: 13,
-  },
-  creditsList: {
-    paddingRight: spacing.lg,
-  },
-  creditCard: {
-    width: 120,
-    marginRight: spacing.md,
-  },
-  creditImage: {
-    width: 120,
-    height: 160,
-    borderRadius: 16,
-    backgroundColor: colors.surface,
-    marginBottom: spacing.sm,
-  },
-  creditImageFallback: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  creditFallbackInitial: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontSemiBold,
-    fontSize: 24,
-  },
-  creditName: {
-    color: colors.textPrimary,
-    fontFamily: typography.fontMedium,
-    fontSize: 14,
-  },
-  creditCharacter: {
-    color: colors.textSecondary,
-    fontFamily: typography.fontRegular,
-    fontSize: 12,
-  },
-});
+const createStyles = (colors: ColorTheme, mode: ThemeMode) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    centered: {
+      justifyContent: "center",
+    },
+    content: {
+      paddingBottom: spacing.xl,
+    },
+    actionsContainer: {
+      paddingHorizontal: spacing.lg,
+      marginTop: spacing.xl,
+    },
+    favoriteAction: {
+      marginBottom: spacing.lg,
+    },
+    ratingContainer: {
+      marginTop: spacing.lg,
+    },
+    ratingLabel: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontSemiBold,
+      fontSize: 16,
+    },
+    starsRow: {
+      flexDirection: "row",
+      marginTop: spacing.sm,
+    },
+    starButton: {
+      marginRight: spacing.sm,
+    },
+    starText: {
+      fontSize: 28,
+      fontFamily: typography.fontSemiBold,
+    },
+    starFilled: {
+      color: colors.accent,
+    },
+    starEmpty: {
+      color: colors.textSecondary,
+    },
+    ratingStatus: {
+      marginTop: spacing.xs,
+      color: colors.textSecondary,
+      fontFamily: typography.fontRegular,
+      fontSize: 13,
+    },
+    ratingSuccess: {
+      color: colors.textPrimary,
+    },
+    ratingError: {
+      color: colors.accent,
+    },
+    backdrop: {
+      height: 320,
+      justifyContent: "flex-end",
+    },
+    backdropImage: {
+      opacity: 0.7,
+    },
+    backdropOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: mode === "dark" ? "rgba(13, 13, 13, 0.6)" : "rgba(0, 0, 0, 0.25)",
+    },
+    backdropFallback: {
+      backgroundColor: colors.surface,
+    },
+    titleWrapper: {
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.xl,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontBold,
+      fontSize: 28,
+    },
+    tagline: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontMedium,
+      fontSize: 16,
+      marginTop: spacing.sm,
+    },
+    section: {
+      paddingHorizontal: spacing.lg,
+      marginTop: spacing.xl,
+    },
+    sectionHeading: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontSemiBold,
+      fontSize: 20,
+      marginBottom: spacing.md,
+    },
+    body: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontRegular,
+      fontSize: 15,
+      lineHeight: 22,
+    },
+    detailRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: spacing.sm,
+    },
+    detailLabel: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontMedium,
+      fontSize: 14,
+    },
+    detailValue: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontSemiBold,
+      fontSize: 14,
+    },
+    rating: {
+      color: colors.accent,
+    },
+    genreContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+    },
+    genreChip: {
+      paddingVertical: spacing.xs,
+      paddingHorizontal: spacing.md,
+      borderRadius: 999,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginRight: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    genreText: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontRegular,
+      fontSize: 13,
+    },
+    creditsList: {
+      paddingRight: spacing.lg,
+    },
+    creditCard: {
+      width: 120,
+      marginRight: spacing.md,
+    },
+    creditImage: {
+      width: 120,
+      height: 160,
+      borderRadius: 16,
+      backgroundColor: colors.surface,
+      marginBottom: spacing.sm,
+    },
+    creditImageFallback: {
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    creditFallbackInitial: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontSemiBold,
+      fontSize: 24,
+    },
+    creditName: {
+      color: colors.textPrimary,
+      fontFamily: typography.fontMedium,
+      fontSize: 14,
+    },
+    creditCharacter: {
+      color: colors.textSecondary,
+      fontFamily: typography.fontRegular,
+      fontSize: 12,
+    },
+  });

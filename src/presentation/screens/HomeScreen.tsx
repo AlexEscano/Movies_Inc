@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useHomeViewModel } from '../hooks/useHomeViewModel';
-import { colors, spacing, typography } from '../theme';
+import { ColorTheme, spacing, typography, useTheme, useThemedStyles } from '../theme';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import { ErrorState } from '../components/ErrorState';
 import { MovieCarousel } from '../components/MovieCarousel';
@@ -12,12 +12,46 @@ import { NowPlayingList } from '../components/NowPlayingList';
 import { useFavorites } from '../state/FavoritesContext';
 import { Movie } from '../../domain/entities/Movie';
 import { HeroCarousel } from '../components/HeroCarousel';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+const createStyles = (colors: ColorTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      paddingVertical: spacing.xl,
+    },
+    header: {
+      paddingHorizontal: spacing.lg,
+      marginBottom: spacing.xl,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    heading: {
+      fontFamily: typography.fontBold,
+      fontSize: 28,
+      color: colors.textPrimary,
+    },
+    heroWrapper: {
+      marginBottom: spacing.xl,
+    },
+    loadingWrapper: {
+      paddingVertical: spacing.xl,
+    },
+  });
 
 export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const { popular, topRated, upcoming, nowPlaying, loading, error } = useHomeViewModel();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
+  const { mode } = useTheme();
+  const styles = useThemedStyles(createStyles);
 
   const handlePressMovie = (id: number) => {
     navigation.navigate('Detail', { movieId: id });
@@ -42,9 +76,14 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={mode === 'dark' ? 'light-content' : 'dark-content'} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.heading}>Movies Inc</Text>
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <Text style={styles.heading}>Movies Inc</Text>
+            <ThemeToggle />
+          </View>
+        </View>
 
         {loading && (
           <View style={styles.loadingWrapper}>
@@ -109,26 +148,3 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    paddingVertical: spacing.xl,
-  },
-  heading: {
-    fontFamily: typography.fontBold,
-    fontSize: 28,
-    color: colors.textPrimary,
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.xl,
-  },
-  heroWrapper: {
-    marginBottom: spacing.xl,
-  },
-  loadingWrapper: {
-    paddingVertical: spacing.xl,
-  },
-});
